@@ -1,0 +1,54 @@
+version: '3.9'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: ram-stores-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ram_stores
+      MYSQL_USER: ramstores
+      MYSQL_PASSWORD: ramstores123
+    ports:
+      - '3306:3306'
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
+    command: --default-authentication-plugin=mysql_native_password
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ram-stores-backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    ports:
+      - '5000:5000'
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ram_stores
+      DB_USER: ramstores
+      DB_PASSWORD: ramstores123
+      JWT_SECRET: supersecretjwtkey
+      PORT: 5000
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ram-stores-frontend
+    restart: unless-stopped
+    ports:
+      - '80:80'
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:

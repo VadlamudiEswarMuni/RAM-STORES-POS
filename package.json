@@ -1,0 +1,19 @@
+{
+  "name": "ram-stores-billing",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace backend\" \"npm run dev --workspace frontend\"",
+    "build": "npm run build --workspace frontend",
+    "start": "npm run start --workspace backend",
+    "lint": "npm run lint --workspace frontend",
+    "db:init": "mysql -u ${DB_USER:-root} -p${DB_PASSWORD:-root} -h ${DB_HOST:-127.0.0.1} ${DB_NAME:-ram_stores} < database/schema.sql"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  }
+}
